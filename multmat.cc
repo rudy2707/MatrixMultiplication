@@ -4,6 +4,11 @@
 #include <unistd.h>
 #include <mpi.h>
 #include <cstring>
+
+#include "fox.h"
+#include "cannon.h"
+#include "dns.h"
+
 using namespace std;
 
 /*
@@ -43,9 +48,6 @@ int* randomInit(int size, int inf, int sup) {
 /*
 Algorithmes de multiplication matricielle parallèle
 */
-void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) { /*à compléter*/ }
-void cannon(int* matLocA, int* matLocB, int* matLocC, int nloc) { /*à compléter*/ }
-void dns(int* matLocA, int* matLocB, int* matLocC, int nloc) { /*à compléter*/ }
 
 int main(int argc, char** argv) {
    MPI_Init(&argc, &argv);
