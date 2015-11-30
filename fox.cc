@@ -65,22 +65,25 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (i + step) mod q == column
         // Sender is k
-        int* matLocT;
+        // Copy of matrix A to avoid modification
+        int* matLocT = new int[nloc * nloc];
+        for (int z = 0; z < nloc * nloc; z++)
+            matLocT[z] = matLocA[z];
         if (j == k) {
             cout << "[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
+            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
             cout << "[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
-            matLocT = matLocA; // If we send our matrix, the T matrix is the one we already have
         }
         else {
-            matLocT = new int[nloc * nloc];
+            //matLocT = new int[nloc * nloc];
             cout << "[" << myPE << "] Wait for T " << endl;
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
             cout << "[" << myPE << "] Receive T " << endl;
         }
 
         // MATRIX B
+        // The matrixB is changed at every step and send to the previous row
+        // So the source and the dest are each time the same
         if (step != 0) {
             //matLocS = new int[nloc * nloc];
             // Send matrix B to dest
@@ -94,43 +97,48 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         }
 
         // Multiplication of A(i, i+step) with B(i+step, j)
-        // Respectively, T and S
-        int* matTemp = multMatrix(matLocT, matLocB, nloc);
+        // Respectively, T and B
+        int* matTemp = multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc);
         // Add the result to C(i, j)
-        for (int k = 0; k < nloc * nloc; k++ )
-            matLocC[k] += matTemp[k];
+        for (int l = 0; l < nloc * nloc; l++ )
+            matLocC[l] += matTemp[l];
 
-        //delete[] matLocS;
-        delete[] matLocT;
-        delete[] matTemp;
-
-        //if (s != (q - 1)) {
-        //    send Bkj to ((i - 1) mod q, j)
-        //    receive Bk+1, j from ((i + 1) mod q, j)
-
-        //}
+        //delete[] matLocT;
+        //delete[] matTemp;
     }
-
-    /* Calculate addresses for circular shift of B */
-    
-    //source = (grid->my_row + 1) % grid->q;
-    //dest = (grid->my_row + grid->q - 1) % grid->q;
-    ///* Set aside storage for the broadcast block of A */
-    //temp_A = Local_matrix_allocate(n_bar);
-
 }
 
-int* multMatrix(int* matLocA, int* matLocB, int nloc) {
-    int* res = new int[nloc * nloc];
-    for (int k = 0; k < nloc * nloc; k++) {
-        int i = (k * nloc) % (nloc - 1);
-        res[k] += matLocA[k] * matLocB[i];
+int* multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB) {
+    int* res = new int[nRowA * nColB];
+    for (int i = 0; i <= nRowA; i++) {
+        for (int j = 0; j < nColB; j++) {
+            int sum = 0;
+            for (int k = 0; k < nRowB; k++)
+                sum = sum + matA[i * nColA + k] * matB[k * nColB + j];
+            res[i * nColB + j] = sum;
+        }
+
     }
+    //for (int i = 0; i < nA * nloc; k++) {
+    //    int i = (k * nloc) % (nloc - 1);
+    //    res[k] = matLocA[k] * matLocB[i];
+    //    cout << matLocA[k] << " * " << matLocB[i] << " = " << res[k] << endl;
+    //}
     return res;
 }
 
 
-
+//void SampleUtils::multiplyMatrices(float* matA, int rA, int cA, float* matB,
+//        int rB, int cB, float* matC, int rC, int cC) {
+//    for (int i = 0; i <= rA; i++) {
+//        for (int j = 0; j <= cB; j++) {
+//            float sum = 0.0;
+//            for (int k = 0; k <= rB; k++)
+//                sum = sum + matA[i * cA + k] * matB[k * cB + j];
+//            matC[i * cC + j] = sum;
+//        }
+//
+//    }
 
 
 

@@ -85,6 +85,19 @@ int main(int argc, char** argv) {
    printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\n");
    printAll(matLocC, nloc, comm_k_cte, "%matrice complete C\n");
 
+   //int* m1 = new int[2 * 2];
+   //int* m2 = new int[2 * 2];
+   //int m1[4] = {1, 2, 3, 4};
+   //int m2[4] = {2, 4, 6, 8};
+   // 1 2   2 4
+   // 3 4   6 8
+
+   //int* m3 = multMatrix(m1, 2, 2, m2, 2, 2);
+
+   //cout << "MATRIX MULT" << endl;
+   //for (int i = 0; i < 4; i++)
+   //    cout << m3[i] << " " << endl;
+
    MPI_Finalize();
    delete matLocA,  matLocB,  matLocC;
    return 0;
