@@ -29,3 +29,6 @@
 
 # MPI
 multmat
+
+# Vim files
+*.swp
