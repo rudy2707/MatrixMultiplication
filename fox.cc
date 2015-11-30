@@ -68,8 +68,8 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         int* matLocT;
         if (j == k) {
             cout << "[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
-            //MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow);
+            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
             cout << "[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
             matLocT = matLocA; // If we send our matrix, the T matrix is the one we already have
         }
@@ -77,15 +77,10 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
             matLocT = new int[nloc * nloc];
             cout << "[" << myPE << "] Wait for T " << endl;
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-            //MPI_Recv(matLocT, nloc * nloc, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             cout << "[" << myPE << "] Receive T " << endl;
         }
 
         // MATRIX B
-        //int* matLocS;
-        //if (step == 0) {
-        //    matLocS = matLocB; // At first step, matrix S is egal to matrix B
-        //}
         if (step != 0) {
             //matLocS = new int[nloc * nloc];
             // Send matrix B to dest
