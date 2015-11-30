@@ -28,7 +28,7 @@
 using namespace std;
 
 /**
- * @brief 
+ * @brief
  *
  * matLocC is already initialized with zeros
  *
@@ -49,7 +49,8 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     int i = myPE / nloc;    // Row
     int j = myPE % nloc;    // Column
 
-    // Source and destionation for sending B
+    // Source and destionation for sending B (circular shift)
+    // TODO : nloc or q ?
     int dest = (myPE + (nloc - 1) * nloc) % (nloc * nloc);
     int source = (myPE + nloc) % (nloc * nloc);
 
@@ -59,8 +60,9 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     cout << "[" << myPE << "] i = " << i << " / j = " << j << endl;
 
     for (int step = 0; step < q; step++) {
+        cout << "[" << myPE << "] Step = " << step << endl;
         // Calculate k : i + step, to avoid doing the addition each time
-        int k = (i + step) % q;
+        int k = (i + step) % q; // TODO : KO ! on attend pas la valeur sur le bon processor
         cout << "[" << myPE << "] k = " << k << endl;
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (i + step) mod q == column
@@ -76,9 +78,9 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         }
         else {
             //matLocT = new int[nloc * nloc];
-            cout << "[" << myPE << "] Wait for T " << endl;
+            cout << "[" << myPE << "] Wait for T from " << k << endl;
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-            cout << "[" << myPE << "] Receive T " << endl;
+            cout << "[" << myPE << "] Receive T from " << k << endl;
         }
 
         // MATRIX B
@@ -90,41 +92,52 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
             cout << "[" << myPE << "] Send S to " << dest << endl;
             cout << "[" << myPE << "] i =  " << i << " / j = " << j << " / step = " << step << endl;
             MPI_Send(matLocB, nloc * nloc, MPI_INT, dest , 0, MPI_COMM_WORLD);
-            // Receive matrix B from source)
+            // Receive matrix B from source
             cout << "[" << myPE << "] Wait for S from " << source << endl;
-            MPI_Recv(matLocB, nloc * nloc, MPI_INT, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(matLocB, nloc * nloc, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             cout << "[" << myPE << "] Received S from " << source << endl;
         }
 
         // Multiplication of A(i, i+step) with B(i+step, j)
         // Respectively, T and B
-        int* matTemp = multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc);
+        //int* matTemp = multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc);
+        //cout << "[" << myPE << "] Before mult" << endl;
+
+        //int* matTemp = new int[nloc * nloc];
+        //for (int i = 0; i <= nloc; i++) {
+        //    for (int j = 0; j < nloc; j++) {
+        //        int sum = 0;
+        //        for (int k = 0; k < nloc; k++)
+        //            sum = sum + matLocT[i * nloc + k] * matLocB[k * nloc + j];
+        //        //matTemp[i * nloc + j] = sum;
+        //        matLocC[i * nloc + j] += sum;
+        //    }
+
+        //}
+
+        //cout << "[" << myPE << "] After mult" << endl;
+        cout << "[" << myPE << "] Before add" << endl;
         // Add the result to C(i, j)
-        for (int l = 0; l < nloc * nloc; l++ )
-            matLocC[l] += matTemp[l];
+        //for (int l = 0; l < nloc * nloc; l++ )
+        //    matLocC[l] += matTemp[l];
+        multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
+        cout << "[" << myPE << "] After add" << endl;
 
         //delete[] matLocT;
         //delete[] matTemp;
     }
 }
 
-int* multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB) {
-    int* res = new int[nRowA * nColB];
+void multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB, int*& matRes) {
     for (int i = 0; i <= nRowA; i++) {
         for (int j = 0; j < nColB; j++) {
             int sum = 0;
             for (int k = 0; k < nRowB; k++)
                 sum = sum + matA[i * nColA + k] * matB[k * nColB + j];
-            res[i * nColB + j] = sum;
+            matRes[i * nColB + j] = sum;
         }
 
     }
-    //for (int i = 0; i < nA * nloc; k++) {
-    //    int i = (k * nloc) % (nloc - 1);
-    //    res[k] = matLocA[k] * matLocB[i];
-    //    cout << matLocA[k] << " * " << matLocB[i] << " = " << res[k] << endl;
-    //}
-    return res;
 }
 
 
