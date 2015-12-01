@@ -11,7 +11,7 @@ In 'multmat.cc' change DEBUG to 1
 
 It will change the output so you can load the output directly into octave
 
-make clean && make run > out.m
+make clean && make test
 
 This will redirect the output into 'out.m'
 

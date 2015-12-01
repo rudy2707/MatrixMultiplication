@@ -4,6 +4,7 @@ RUN=mpirun
 RFLAGS=-np
 
 EXEC=multmat
+OUT=out.m
 
 RM=rm -f
 
@@ -33,6 +34,9 @@ cannon.o: cannon.cc cannon.h
 
 run: $(EXEC)
 	@$(RUN) $(RFLAGS) $(PROC) $< $(ALGO) $(SEED) $(DATA)
+
+test: $(EXEC)
+	@$(RUN) $(RFLAGS) $(PROC) $< $(ALGO) $(SEED) $(DATA) >> $(OUT)
 
 clean:
 	@$(RM) *.o
