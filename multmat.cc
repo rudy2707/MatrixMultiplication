@@ -107,15 +107,28 @@ int main(int argc, char** argv) {
 
    //int* m1 = new int[2 * 2];
    //int* m2 = new int[2 * 2];
-   //int m1[4] = {1, 2, 3, 4};
-   //int m2[4] = {2, 4, 6, 8};
-   // 1 2   2 4
-   // 3 4   6 8
+   //int m3[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+   //int* m3 = new int[3 * 3];
+   //for (int i = 0; i < 9; i++) m3[i] = 0;
+   //int m1[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+   //int m2[9] = {2, 4, 6, 8, 9, 2, 4, 3, 1};
+   // 1 2 3     2 4 6
+   // 4 5 6     8 9 2
+   // 7 8 9     2 4 3
 
-   //int* m3 = multMatrix(m1, 2, 2, m2, 2, 2);
+   //multMatrix(m1, 2, 2, m2, 2, 2, m3);
+   //     for (int i = 0; i <= nloc; i++) {
+   //         for (int j = 0; j < nloc; j++) {
+   //             int sum = 0;
+   //             for (int k = 0; k < nloc; k++)
+   //                 sum = sum + m1[i * nloc + k] * m2[k * nloc + j];
+   //             //matTemp[i * nloc + j] = sum;
+   //             m3[i * nloc + j] += sum;
+   //         }
+   //     }
 
    //cout << "MATRIX MULT" << endl;
-   //for (int i = 0; i < 4; i++)
+   //for (int i = 0; i < 9; i++)
    //    cout << m3[i] << " " << endl;
 
    MPI_Finalize();

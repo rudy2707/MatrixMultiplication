@@ -51,8 +51,8 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
 
     // Source and destionation for sending B (circular shift)
     // TODO : nloc or q ?
-    int dest = (myPE + (nloc - 1) * nloc) % (nloc * nloc);  // TODO : OK si myPE est global
-    int source = (myPE + nloc) % (nloc * nloc);             // TODO : OK si myPE est global
+    int dest = (myPE + (q - 1) * q) % (q * q);  // TODO : OK si myPE est global
+    int source = (myPE + q) % (q * q);             // TODO : OK si myPE est global
     //source = (i + 1) % q;
     //dest = (i + q - 1) % q;
 
@@ -61,6 +61,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     // TODO : Row and column OK
     cout << "%[" << myPE << "] Init i = " << i << " / j = " << j << endl;
 
+    //int* matLocT = new int[nloc * nloc];
     for (int step = 0; step < q; step++) {
         // Calculate k : i + step, to avoid doing the addition each time
         int k = (i + step) % q; // TODO : KO ! on attend pas la valeur sur le bon processor
@@ -81,6 +82,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, sender, commRow); // TODO : matrix a est modif => ko
             cout << "%[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << endl;
+            //matLocT = matLocA;
         }
         else {
             //matLocT = new int[nloc * nloc];
@@ -112,28 +114,28 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         //cout << "[" << myPE << "] Before mult" << endl;
 
         //int* matTemp = new int[nloc * nloc];
-        //for (int i = 0; i <= nloc; i++) {
-        //    for (int j = 0; j < nloc; j++) {
-        //        int sum = 0;
-        //        for (int k = 0; k < nloc; k++)
-        //            sum = sum + matLocT[i * nloc + k] * matLocB[k * nloc + j];
-        //        //matTemp[i * nloc + j] = sum;
-        //        matLocC[i * nloc + j] += sum;
-        //    }
-
-        //}
+        for (int i = 0; i <= nloc; i++) {
+            for (int j = 0; j < nloc; j++) {
+                int sum = 0;
+                for (int k = 0; k < nloc; k++)
+                    sum = sum + matLocT[i * nloc + k] * matLocB[k * nloc + j];
+                //matTemp[i * nloc + j] = sum;
+                matLocC[i * nloc + j] += sum;
+            }
+        }
 
         //cout << "[" << myPE << "] After mult" << endl;
         cout << "%[" << myPE << "] Before add" << endl;
         // Add the result to C(i, j)
         //for (int l = 0; l < nloc * nloc; l++ )
         //    matLocC[l] += matTemp[l];
-        multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
+        //multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
         cout << "%[" << myPE << "] After add" << endl;
 
-        //delete[] matLocT;
+        delete[] matLocT;
         //delete[] matTemp;
     }
+        //delete[] matLocT;
 }
 
 void multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB, int*& matRes) {
@@ -144,7 +146,6 @@ void multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB
                 sum = sum + matA[i * nColA + k] * matB[k * nColB + j];
             matRes[i * nColB + j] = sum;
         }
-
     }
 }
 
