@@ -66,21 +66,25 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         cout << "[" << myPE << "] k = " << k << endl;
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (i + step) mod q == column
-        // Sender is k
         // Copy of matrix A to avoid modification
         int* matLocT = new int[nloc * nloc];
         for (int z = 0; z < nloc * nloc; z++)
             matLocT[z] = matLocA[z];
+
+        // Sender is (k + i * q) mod q
+        int sender = (k + i * q) % q;
+
         if (j == k) {
-            cout << "[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
-            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
-            cout << "[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << endl;
+            cout << "[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << " (step=" << step << ")" << endl;
+            // WRONG value
+            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, sender, commRow); // TODO : matrix a est modif => ko
+            cout << "[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << endl;
         }
         else {
             //matLocT = new int[nloc * nloc];
-            cout << "[" << myPE << "] Wait for T from " << k << endl;
-            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-            cout << "[" << myPE << "] Receive T from " << k << endl;
+            cout << "[" << myPE << "] Wait for T from " << sender << endl;
+            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, sender, commRow);
+            cout << "[" << myPE << "] Receive T from " << sender << endl;
         }
 
         // MATRIX B
