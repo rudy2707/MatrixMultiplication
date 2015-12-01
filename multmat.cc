@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
    // 7 8 9     2 4 3
 
    //multMatrix(m1, 2, 2, m2, 2, 2, m3);
-   //     for (int i = 0; i <= nloc; i++) {
+   //     for (int i = 0; i < nloc; i++) {
    //         for (int j = 0; j < nloc; j++) {
    //             int sum = 0;
    //             for (int k = 0; k < nloc; k++)

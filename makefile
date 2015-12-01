@@ -14,7 +14,7 @@ SEED=17
 # 1 = Fox / 2 = Cannon / 3 = DNS
 ALGO=1
 # Size of the sub-matrix
-#DATA=5
+#DATA=8
 DATA=3
 
 $(EXEC): multmat.o fox.o dns.o cannon.o
