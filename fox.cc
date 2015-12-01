@@ -57,13 +57,13 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     MPI_Comm_split(MPI_COMM_WORLD, myPE / nloc, myPE, &commRow); // TODO : GROUP OK (myPE / nloc)
 
     // TODO : Row and column OK
-    cout << "[" << myPE << "] i = " << i << " / j = " << j << endl;
+    cout << "%[" << myPE << "] i = " << i << " / j = " << j << endl;
 
     for (int step = 0; step < q; step++) {
-        cout << "[" << myPE << "] Step = " << step << endl;
+        cout << "%[" << myPE << "] Step = " << step << endl;
         // Calculate k : i + step, to avoid doing the addition each time
         int k = (i + step) % q; // TODO : KO ! on attend pas la valeur sur le bon processor
-        cout << "[" << myPE << "] k = " << k << endl;
+        cout << "%[" << myPE << "] k = " << k << endl;
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (i + step) mod q == column
         // Copy of matrix A to avoid modification
@@ -75,16 +75,16 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         int sender = (k + i * q) % q;
 
         if (j == k) {
-            cout << "[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << " (step=" << step << ")" << endl;
+            cout << "%[" << myPE << "] Broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << " (step=" << step << ")" << endl;
             // WRONG value
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, sender, commRow); // TODO : matrix a est modif => ko
-            cout << "[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << endl;
+            cout << "%[" << myPE << "] After broadcast A : i = " << i << " / j = " << j << " / k =  " << k << " from " << sender << endl;
         }
         else {
             //matLocT = new int[nloc * nloc];
-            cout << "[" << myPE << "] Wait for T from " << sender << endl;
+            cout << "%[" << myPE << "] Wait for T from " << sender << endl;
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, sender, commRow);
-            cout << "[" << myPE << "] Receive T from " << sender << endl;
+            cout << "%[" << myPE << "] Receive T from " << sender << endl;
         }
 
         // MATRIX B
@@ -93,13 +93,13 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         if (step != 0) {
             //matLocS = new int[nloc * nloc];
             // Send matrix B to dest
-            cout << "[" << myPE << "] Send S to " << dest << endl;
-            cout << "[" << myPE << "] i =  " << i << " / j = " << j << " / step = " << step << endl;
+            cout << "%[" << myPE << "] Send S to " << dest << endl;
+            cout << "%[" << myPE << "] i =  " << i << " / j = " << j << " / step = " << step << endl;
             MPI_Send(matLocB, nloc * nloc, MPI_INT, dest , 0, MPI_COMM_WORLD);
             // Receive matrix B from source
-            cout << "[" << myPE << "] Wait for S from " << source << endl;
+            cout << "%[" << myPE << "] Wait for S from " << source << endl;
             MPI_Recv(matLocB, nloc * nloc, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            cout << "[" << myPE << "] Received S from " << source << endl;
+            cout << "%[" << myPE << "] Received S from " << source << endl;
         }
 
         // Multiplication of A(i, i+step) with B(i+step, j)
@@ -120,12 +120,12 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         //}
 
         //cout << "[" << myPE << "] After mult" << endl;
-        cout << "[" << myPE << "] Before add" << endl;
+        cout << "%[" << myPE << "] Before add" << endl;
         // Add the result to C(i, j)
         //for (int l = 0; l < nloc * nloc; l++ )
         //    matLocC[l] += matTemp[l];
         multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
-        cout << "[" << myPE << "] After add" << endl;
+        cout << "%[" << myPE << "] After add" << endl;
 
         //delete[] matLocT;
         //delete[] matTemp;

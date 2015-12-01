@@ -1,0 +1,26 @@
+Matrix Multiplication
+
+Compilation : make clean && make run
+
+Message of makefile are not print because '@' option is used.
+
+Test
+----
+
+In 'multmat.cc' change DEBUG to 1
+
+It will change the output so you can load the output directly into octave
+
+make clean && make run > out.m
+
+This will redirect the output into 'out.m'
+
+Open octave : octave --no-gui
+
+run check
+
+'check' programm will load 'out.m' and check if A * B = C
+
+If you want to print anything on the console, print a '%' at the beginning of the line
+so octave interprets it as a comment.
+

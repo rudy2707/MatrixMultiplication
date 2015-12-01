@@ -2,9 +2,10 @@
 % Verification of matrix multiplication
 % for parallele programming.
 
-A = importdata("A.txt")
-B = importdata("B.txt")
-C = importdata("C.txt")
+out;    % Import out.m
+%A = importdata("A.txt")
+%B = importdata("B.txt")
+%C = importdata("C.txt")
 
 R = A * B
 

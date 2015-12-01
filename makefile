@@ -16,24 +16,25 @@ ALGO=1
 #DATA=5
 DATA=3
 
-$(EXEC): multmat.o fox.o dns.o cannon.o 
-	$(CC) $^ -o $@
+$(EXEC): multmat.o fox.o dns.o cannon.o
+	@$(CC) $^ -o $@
 
 multmat.o: multmat.cc
-	$(CC) -c $<
+	@$(CC) -c $<
 
 fox.o: fox.cc fox.h
-	$(CC) -c $<
+	@$(CC) -c $<
 
 dns.o: dns.cc dns.h
-	$(CC) -c $<
+	@$(CC) -c $<
 
 cannon.o: cannon.cc cannon.h
-	$(CC) -c $<
+	@$(CC) -c $<
 
 run: $(EXEC)
-	$(RUN) $(RFLAGS) $(PROC) $< $(ALGO) $(SEED) $(DATA)
+	@$(RUN) $(RFLAGS) $(PROC) $< $(ALGO) $(SEED) $(DATA)
 
 clean:
-	$(RM) *.o
-	$(RM) $(EXEC)
+	@$(RM) *.o
+	@$(RM) out.m
+	@$(RM) $(EXEC)

@@ -9,7 +9,7 @@
 #include "cannon.h"
 #include "dns.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 using namespace std;
 
@@ -94,9 +94,16 @@ int main(int argc, char** argv) {
       MPI_Comm_split(MPI_COMM_WORLD, k, myPE, &comm_k_cte);
       dns(matLocA, matLocB, matLocC, nloc);
    }
-   printAll(matLocA, nloc, comm_j_cte, "%matrice complete A\n");
-   printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\n");
-   printAll(matLocC, nloc, comm_k_cte, "%matrice complete C\n");
+   if (DEBUG) {
+       printAll(matLocA, nloc, comm_j_cte, "%matrice complete A\nA = ");
+       printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\nB = ");
+       printAll(matLocC, nloc, comm_k_cte, "%matrice complete C\nC = ");
+   }
+   else {
+       printAll(matLocA, nloc, comm_j_cte, "%matrice complete A\n");
+       printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\n");
+       printAll(matLocC, nloc, comm_k_cte, "%matrice complete C\n");
+   }
 
    //int* m1 = new int[2 * 2];
    //int* m2 = new int[2 * 2];
