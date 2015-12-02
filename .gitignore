@@ -32,3 +32,5 @@ multmat
 
 # Vim files
 *.swp
+
+octave-workspace

@@ -9,7 +9,7 @@
 #include "cannon.h"
 #include "dns.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -18,6 +18,26 @@ Les sous-matrices <mat> de dimension <nloc>x<nloc> sur les <nbPE> processeurs
 du groupe de communication <comm> sont rassemblées sur le processeur 0
 qui les affiche en une grande matrice de dimension (<p>*<nloc>) x (<p>*<nloc>)
 */
+//void printAll(int* mat,int nloc,MPI_Comm comm,string label) { 
+//   int nbPE,globalPE;
+//   MPI_Comm_size(comm,&nbPE);
+//   MPI_Comm_rank(MPI_COMM_WORLD,&globalPE);
+//   int* recv_buf = new int[nbPE*nloc*nloc];
+//   MPI_Gather(mat,nloc*nloc,MPI_INT,recv_buf,nloc*nloc,MPI_INT,0,comm);
+//   if (globalPE == 0) {
+//      int p = sqrt(nbPE+0.1);
+//      cout << label;
+//      for (int global=0;global<(p*nloc)*(p*nloc);global++) {
+//         int global_i = global/(p*nloc); int global_j = global%(p*nloc);
+//         int pe_i = global_i/nloc; int pe_j = global_j/nloc;
+//         int local_i = global_i%nloc; int local_j = global_j%nloc;
+//         int pe = pe_i*p+pe_j; int local = local_i*nloc+local_j;
+//         cout << recv_buf[pe*nloc*nloc + local] << " ";
+//         if ((global+1)%(p*nloc) == 0) cout << endl;
+//      }
+//   }
+//   delete recv_buf; 
+//}
 void printAll(int* mat, int nloc, MPI_Comm comm, string label) {
     int nbPE, globalPE;
     MPI_Comm_size(comm, &nbPE);
@@ -37,8 +57,7 @@ void printAll(int* mat, int nloc, MPI_Comm comm, string label) {
             cout << recv_buf[pe * nloc * nloc + local] << " ";
             if ((global + 1) % (p * nloc) == 0) {
                 if (DEBUG) {
-                    if (global != (p * nloc) * (p * nloc) - 1)
-                        cout << ";";
+                    cout << ";";
                 }
                 else
                     cout << endl;

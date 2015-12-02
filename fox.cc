@@ -42,9 +42,11 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     MPI_Comm_size(MPI_COMM_WORLD, &nbPE);
     MPI_Comm_rank(MPI_COMM_WORLD, &myPE);
     MPI_Comm commRow;
-    //MPI_Comm commCol;
+    MPI_Comm commCol;
 
     int q = sqrt(nbPE);
+
+    cout << "%q = " << q << endl;
 
     // Find position of myPE in the matrix
     int row = myPE / q;    // Row
@@ -57,10 +59,15 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     //int dest = (row + q - 1) % q;
 
     MPI_Comm_split(MPI_COMM_WORLD, row, myPE, &commRow); // TODO : GROUP OK (myPE / nloc)
-    //MPI_Comm_split(MPI_COMM_WORLD, col, myPE, &commCol);
+    MPI_Comm_split(MPI_COMM_WORLD, col, myPE, &commCol);
+
+    int rowPE;
+    int colPE;
+    MPI_Comm_rank(commRow, &rowPE);
+    MPI_Comm_rank(commCol, &colPE);
 
     // TODO : Row and column OK
-    cout << "%[" << myPE << "] Init i = " << row << " / j = " << col << endl;
+    cout << "%[" << myPE << "(" << rowPE << ")] Init i = " << row << " / j = " << col << endl;
 
     // Temporary matrix to get the matrix from broadcast
     int* matLocT = new int[nloc * nloc];
@@ -73,7 +80,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (row + step) mod q == column
         if (col == k) {
-            cout << "%[" << myPE << "] Broadcast A from " << k << " (step=" << step << ")" << endl;
+            cout << "%[" << myPE << "(" << rowPE << ")] Broadcast A from " << k << " (step=" << step << ") : "  << matLocA[0] << endl;
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
             //cout << "%[" << myPE << "] After broadcast A : i = " << row << " / j = " << col << " / k =  " << k << " from " << sender << endl;
@@ -83,30 +90,46 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
             //matLocT = new int[nloc * nloc];
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-            cout << "%[" << myPE << "] Received A from " << k << " (step=" << step << ")" << endl;
+            cout << "%[" << myPE << "(" << rowPE << ")] Received A from " << k << " (step=" << step << ") : " << matLocT[0] << endl;
         }
 
         // MATRIX B
         // The matrixB is modified at every step and send to the previous row
         // So the source and the dest are each time the same
-        if (step > 0) {
+        if (step != 0) {
             // Send matrix B to dest
-            cout << "%[" << myPE << "] Send B to " << dest << " (step=" << step << ")" <<  " : " << matLocB[0] << endl;
+            cout << "%[" << myPE << "(" << colPE << ")] Send B to " << dest << " (step=" << step << ")" <<  " : " << matLocB[0] << endl;
             MPI_Send(matLocB, nloc * nloc, MPI_INT, dest , 0, MPI_COMM_WORLD);
             // Receive matrix B from source
             MPI_Recv(matLocB, nloc * nloc, MPI_INT, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            cout << "%[" << myPE << "] Received B from " << source << " (step=" << step << ")" <<  " : " << matLocB[0] <<  endl;
+            cout << "%[" << myPE << "(" << colPE << ")] Received B from " << source << " (step=" << step << ")" <<  " : " << matLocB[0] <<  endl;
             //MPI_Sendrecv_replace(matLocB, nloc * nloc, MPI_INT,
             //    dest, 0, source, 0, commCol, MPI_STATUS_IGNORE);
         }
 
         // Multiplication of A(i, i+step) with B(i+step, j)
-        if (col == k)
-            multMatrix(matLocA, nloc, nloc, matLocB, nloc, nloc, matLocC);
-        else
-            multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
+        if (col == k) {
+            //multMatrix(matLocA, nloc, nloc, matLocB, nloc, nloc, matLocC);
+            for (int i = 0; i < nloc; i++) {
+                for (int j = 0; j < nloc; j++) {
+                    for (int k = 0; k < nloc; k++) {
+                        matLocC[i * nloc + j] += matLocA[i * nloc + k] * matLocB[k * nloc + j];
+                    }
+                }
+            }
+        }
+        else {
+            //multMatrix(matLocT, nloc, nloc, matLocB, nloc, nloc, matLocC);
+            for (int i = 0; i < nloc; i++) {
+                for (int j = 0; j < nloc; j++) {
+                    for (int k = 0; k < nloc; k++) {
+                        matLocC[i * nloc + j] += matLocT[i * nloc + k] * matLocB[k * nloc + j];
+                    }
+                }
+            }
+        }
 
-        cout << "%[" << myPE << "] Addition done" << endl;
+        cout << "%[" << myPE << "(" << rowPE << ")] Addition done" << endl;
 
     }
     delete[] matLocT;
@@ -121,22 +144,4 @@ void multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB
         }
     }
 }
-
-
-//void SampleUtils::multiplyMatrices(float* matA, int rA, int cA, float* matB,
-//        int rB, int cB, float* matC, int rC, int cC) {
-//    for (int i = 0; i <= rA; i++) {
-//        for (int j = 0; j <= cB; j++) {
-//            float sum = 0.0;
-//            for (int k = 0; k <= rB; k++)
-//                sum = sum + matA[i * cA + k] * matB[k * cB + j];
-//            matC[i * cC + j] = sum;
-//        }
-//
-//    }
-
-
-
-
-
 
