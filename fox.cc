@@ -27,16 +27,6 @@
 
 using namespace std;
 
-/**
- * @brief
- *
- * matLocC is already initialized with zeros
- *
- * @param matLocA
- * @param matLocB
- * @param matLocC
- * @param nloc
- */
 void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     int nbPE, myPE;
     MPI_Comm_size(MPI_COMM_WORLD, &nbPE);
@@ -95,21 +85,6 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     delete[] matLocS;
 }
 
-/**
- * @brief Multiplication of two matrix
- *
- * The result is added into matRes
- *
- * Size of matrix Res is calculated in the function
- *
- * @param matA      Matrix A
- * @param nRowA     Number of row A
- * @param nColA     Number of col A
- * @param matB      Matrix B
- * @param nRowB     Number of row B
- * @param nColB     Number of col B
- * @param matRes    Matrix for the result
- */
 void multMatrix(int* matA, int nRowA, int nColA, int* matB, int nRowB, int nColB, int*& matRes) {
     for (int i = 0; i < nRowA; i++) {
         for (int j = 0; j < nColB; j++) {

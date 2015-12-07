@@ -33,4 +33,10 @@ multmat
 # Vim files
 *.swp
 
+# Latex
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+
 octave-workspace
