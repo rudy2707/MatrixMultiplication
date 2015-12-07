@@ -9,7 +9,7 @@
 #include "cannon.h"
 #include "dns.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 using namespace std;
 
@@ -18,26 +18,6 @@ Les sous-matrices <mat> de dimension <nloc>x<nloc> sur les <nbPE> processeurs
 du groupe de communication <comm> sont rassemblées sur le processeur 0
 qui les affiche en une grande matrice de dimension (<p>*<nloc>) x (<p>*<nloc>)
 */
-//void printAll(int* mat,int nloc,MPI_Comm comm,string label) { 
-//   int nbPE,globalPE;
-//   MPI_Comm_size(comm,&nbPE);
-//   MPI_Comm_rank(MPI_COMM_WORLD,&globalPE);
-//   int* recv_buf = new int[nbPE*nloc*nloc];
-//   MPI_Gather(mat,nloc*nloc,MPI_INT,recv_buf,nloc*nloc,MPI_INT,0,comm);
-//   if (globalPE == 0) {
-//      int p = sqrt(nbPE+0.1);
-//      cout << label;
-//      for (int global=0;global<(p*nloc)*(p*nloc);global++) {
-//         int global_i = global/(p*nloc); int global_j = global%(p*nloc);
-//         int pe_i = global_i/nloc; int pe_j = global_j/nloc;
-//         int local_i = global_i%nloc; int local_j = global_j%nloc;
-//         int pe = pe_i*p+pe_j; int local = local_i*nloc+local_j;
-//         cout << recv_buf[pe*nloc*nloc + local] << " ";
-//         if ((global+1)%(p*nloc) == 0) cout << endl;
-//      }
-//   }
-//   delete recv_buf; 
-//}
 void printAll(int* mat, int nloc, MPI_Comm comm, string label) {
     int nbPE, globalPE;
     MPI_Comm_size(comm, &nbPE);
@@ -68,6 +48,7 @@ void printAll(int* mat, int nloc, MPI_Comm comm, string label) {
     }
     delete recv_buf;
 }
+
 /*
 Allocation et initialisation aléatoire d'une matrice de dimension <size>x<size>
 avec des valeurs entières entre <inf> et <sup>;  cette matrice est retournée
@@ -77,10 +58,10 @@ int* randomInit(int size, int inf, int sup) {
    for (int i=0; i < size * size; i++) mat[i] = inf + rand() % (sup - inf);
    return mat;
 }
+
 /*
 Algorithmes de multiplication matricielle parallèle
 */
-
 int main(int argc, char** argv) {
    MPI_Init(&argc, &argv);
    int nbPE, myPE;
@@ -113,6 +94,7 @@ int main(int argc, char** argv) {
       MPI_Comm_split(MPI_COMM_WORLD, k, myPE, &comm_k_cte);
       dns(matLocA, matLocB, matLocC, nloc);
    }
+   // Debug mode for octave
    if (DEBUG) {
        printAll(matLocA, nloc, comm_j_cte, "%matrice complete A\nA = ");
        printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\nB = ");
@@ -123,32 +105,6 @@ int main(int argc, char** argv) {
        printAll(matLocB, nloc, comm_i_cte, "%matrice complete B\n");
        printAll(matLocC, nloc, comm_k_cte, "%matrice complete C\n");
    }
-
-   //int* m1 = new int[2 * 2];
-   //int* m2 = new int[2 * 2];
-   //int m3[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-   //int* m3 = new int[3 * 3];
-   //for (int i = 0; i < 9; i++) m3[i] = 0;
-   //int m1[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-   //int m2[9] = {2, 4, 6, 8, 9, 2, 4, 3, 1};
-   // 1 2 3     2 4 6
-   // 4 5 6     8 9 2
-   // 7 8 9     2 4 3
-
-   //multMatrix(m1, 2, 2, m2, 2, 2, m3);
-   //     for (int i = 0; i < nloc; i++) {
-   //         for (int j = 0; j < nloc; j++) {
-   //             int sum = 0;
-   //             for (int k = 0; k < nloc; k++)
-   //                 sum = sum + m1[i * nloc + k] * m2[k * nloc + j];
-   //             //matTemp[i * nloc + j] = sum;
-   //             m3[i * nloc + j] += sum;
-   //         }
-   //     }
-
-   //cout << "MATRIX MULT" << endl;
-   //for (int i = 0; i < 9; i++)
-   //    cout << m3[i] << " " << endl;
 
    MPI_Finalize();
    delete matLocA,  matLocB,  matLocC;
