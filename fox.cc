@@ -46,8 +46,6 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
 
     int q = sqrt(nbPE);
 
-    cout << "%q = " << q << endl;
-
     // Find position of myPE in the matrix
     int row = myPE / q;    // Row
     int col = myPE % q;    // Column
@@ -78,24 +76,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
 
         // MATRIX T
         // Broadcast A(i, i+step) = S to process on row (commRow) if (row + step) mod q == column
-        if (col == k) {
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
-            // Version broadcast manuel
-            //for (int i = 0; i < q; i++) {
-            //    int destT = row * q + i;
-            //    if (destT != myPE) {
-            //        MPI_Send(matLocT, nloc * nloc, MPI_INT, destT , 0, MPI_COMM_WORLD);
-            //        cout << "%[" << myPE << "(" << rowPE << ")] Send A from " << myPE << " (step=" << step << ") to " << destT<< " : "  << matLocA[0] << endl;
-            //    }
-            //}
-        }
-        else {
-            MPI_Barrier(MPI_COMM_WORLD);
-            //int sourceT = row * q + k;
-            //MPI_Recv(matLocT, nloc * nloc, MPI_INT, sourceT, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-        }
+        MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
 
         // MATRIX B
         // The matrixB is modified at every step and send to the previous row
