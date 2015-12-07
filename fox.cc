@@ -55,6 +55,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     // Source and destionation for sending B (circular shift)
     int dest = (myPE + (q - 1) * q) % (q * q);
     int source = (myPE + q) % (q * q);
+    //to = row + q - k
     //int source = (row + 1) % q;
     //int dest = (row + q - 1) % q;
 
@@ -73,24 +74,35 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     int* matLocT = new int[nloc * nloc];
 
     for (int step = 0; step < q; step++) {
-        // Calculate k : i + step, to avoid doing the addition each time
+        // Calculate k : row + step, to avoid doing the addition each time
         // k is the sender of matrix A
         int k = (row + step) % q;
 
         // MATRIX T
         // Broadcast A(i, i+step) to process on row i (commRow) if (row + step) mod q == column
         if (col == k) {
-            cout << "%[" << myPE << "(" << rowPE << ")] Broadcast A from " << k << " (step=" << step << ") : "  << matLocA[0] << endl;
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
+            //cout << "%[" << myPE << "(" << rowPE << ")] Broadcast A from " << k << " (step=" << step << ") : "  << matLocA[0] << endl;
+            //MPI_Barrier(MPI_COMM_WORLD);
+            //MPI_Bcast(matLocA, nloc * nloc , MPI_INT, k, commRow); // TODO : matrix a est modif => ko
+            // Version broadcast manuel
+            for (int i = 0; i < q; i++) {
+                int destT = row * q + i;
+                if (destT != myPE) {
+                    MPI_Send(matLocA, nloc * nloc, MPI_INT, destT , 0, MPI_COMM_WORLD);
+                    cout << "%[" << myPE << "(" << rowPE << ")] Send A from " << myPE << " (step=" << step << ") to " << destT<< " : "  << matLocA[0] << endl;
+                }
+            }
             //cout << "%[" << myPE << "] After broadcast A : i = " << row << " / j = " << col << " / k =  " << k << " from " << sender << endl;
             //matLocT = matLocA;
         }
         else {
             //matLocT = new int[nloc * nloc];
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
-            cout << "%[" << myPE << "(" << rowPE << ")] Received A from " << k << " (step=" << step << ") : " << matLocT[0] << endl;
+            //MPI_Barrier(MPI_COMM_WORLD);
+            int sourceT = row * q + k;
+            MPI_Recv(matLocT, nloc * nloc, MPI_INT, sourceT, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            cout << "%[" << myPE << "(" << rowPE << ")] Received A from " << sourceT << " (step=" << step << ") : " << matLocT[0] << endl;
+            //MPI_Bcast(matLocT, nloc * nloc , MPI_INT, k, commRow);
+            //cout << "%[" << myPE << "(" << rowPE << ")] Received A from " << k << " (step=" << step << ") : " << matLocT[0] << endl;
         }
 
         // MATRIX B
@@ -128,9 +140,7 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
                 }
             }
         }
-
         cout << "%[" << myPE << "(" << rowPE << ")] Addition done" << endl;
-
     }
     delete[] matLocT;
 }

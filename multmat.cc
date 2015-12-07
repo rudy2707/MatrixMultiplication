@@ -9,7 +9,7 @@
 #include "cannon.h"
 #include "dns.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 using namespace std;
 
@@ -18,7 +18,7 @@ Les sous-matrices <mat> de dimension <nloc>x<nloc> sur les <nbPE> processeurs
 du groupe de communication <comm> sont rassemblées sur le processeur 0
 qui les affiche en une grande matrice de dimension (<p>*<nloc>) x (<p>*<nloc>)
 */
-//void printAll(int* mat,int nloc,MPI_Comm comm,string label) { 
+//void printAll(int* mat,int nloc,MPI_Comm comm,string label) {
 //   int nbPE,globalPE;
 //   MPI_Comm_size(comm,&nbPE);
 //   MPI_Comm_rank(MPI_COMM_WORLD,&globalPE);
@@ -36,7 +36,7 @@ qui les affiche en une grande matrice de dimension (<p>*<nloc>) x (<p>*<nloc>)
 //         if ((global+1)%(p*nloc) == 0) cout << endl;
 //      }
 //   }
-//   delete recv_buf; 
+//   delete recv_buf;
 //}
 void printAll(int* mat, int nloc, MPI_Comm comm, string label) {
     int nbPE, globalPE;
