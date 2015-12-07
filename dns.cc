@@ -44,7 +44,6 @@ void dns(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     multMatrix(matLocA, nloc, nloc, matLocB, nloc, nloc, matLocC);
 
     // Reducing the results to the C matrix
-    //int result[nloc*nloc];
     int* result = new int[nloc * nloc];
     MPI_Reduce(matLocC, result, nloc*nloc, MPI_INT, MPI_SUM, 0, comm_c);
     
