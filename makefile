@@ -3,22 +3,22 @@ CC=mpiCC
 RUN=mpirun
 RFLAGS=-np
 
-EXEC=multmat
+EXEC=multmat_all
 OUT=out.m
 
 RM=rm -f
 
-PROC=64
+PROC=144
 SEED=17
 # 1 = Fox / 2 = Cannon / 3 = DNS
-ALGO=2
+ALGO=1
 # Size of the sub-matrix
-DATA=8
+DATA=12
 
-$(EXEC): multmat.o fox.o dns.o cannon.o
+$(EXEC): multmat_all.o fox.o dns.o cannon.o
 	@$(CC) $^ -o $@
 
-multmat.o: multmat.cc
+multmat_all.o: multmat_all.cc
 	@$(CC) -c $<
 
 fox.o: fox.cc fox.h
