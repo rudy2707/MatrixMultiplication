@@ -74,53 +74,54 @@ void cannon(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     // - My_matLocA = T
     // - My_matLocB = S
 	
-	// [Matrice A] Décalage à gauche de la ligne i de i position
-	// Dernière ligne ne bouge pas (+1 pour aligner lin au vrai numero de ligne 
-	// (si matrice à 3 lignes lin max = 2, car lin min = 0))
-	if ((lin+1) != q){	
-		int destdecalA = ((myPE + (q-(lin+1))) % q)+(q*lin);
-		int sourcedecalA = ((myPE + (lin+1)) % q)+(q*lin);
-		//cout << "[Processus : " << myPE << "] destdecalA : " << destdecalA << endl;
-		//cout << "[Processus : " << myPE << "] sourcedecalA : " << sourcedecalA << endl;
-		// Envoie ça matrice de i position (numéro de ligne) vers la gauche
-		MPI_Send(My_matLocA, nloc * nloc, MPI_INT, destdecalA , 0, MPI_COMM_WORLD);
-		// Reçois ça matrice de ça source
-		MPI_Recv(My_matLocA, nloc * nloc, MPI_INT, sourcedecalA, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
-	
-	// [Matrice B] Décalage en haut de la colonne j de j position
-	if((col+1) != q){	//Dernière colonne ne bouge pas
-		int destdecalB = (myPE + (q - (col+1)) * q) % (q * q);
-		int sourcedecalB = (myPE + (q*(col+1))) % (q * q);
-		//cout << "[Processus : " << myPE << "] destdecalB : " << destdecalB << endl;
-		//cout << "[Processus : " << myPE << "] sourcedecalB : " << sourcedecalB << endl;
-		// Envoie ça matrice de j position (numéro de colonne) vers le haut
-		MPI_Send(My_matLocA, nloc * nloc, MPI_INT, destdecalB , 0, MPI_COMM_WORLD);
-		// Reçois ça matrice de ça source
-		MPI_Recv(My_matLocA, nloc * nloc, MPI_INT, sourcedecalB, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
-	
 	// Multiplication des matrice A et B dans C
     //multMatrix(My_matLocA, nloc, nloc, My_matLocB, nloc, nloc, matLocC);
 
-    for (int k = 1; k < q; k++) {
+    for (int k = 0; k < q; k++) {
     	//cout << "[Processus : " << myPE << "] Test boucle"<< endl;
-    	
-		// Multiplication des matrice A et B dans C
-        // multMatrix(My_matLocA, nloc, nloc, My_matLocB, nloc, nloc, matLocC);
-
-        // [Matrice A alias T] Décalage à gauche de une position
-		// Envoie ça matrice à la destination
-		MPI_Send(My_matLocA, nloc * nloc, MPI_INT, destA , 0, MPI_COMM_WORLD);
-		// Reçois ça matrice de ça source
-		MPI_Recv(My_matLocA, nloc * nloc, MPI_INT, sourceA, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
-		// [Matrice B alisa S] Décalage vers le haut de une position
-		// Envoie ça matrice à la destination
-		MPI_Send(My_matLocB, nloc * nloc, MPI_INT, destB , 0, MPI_COMM_WORLD);
-		// Reçois ça matrice de ça source
-		MPI_Recv(My_matLocB, nloc * nloc, MPI_INT, sourceB, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		
+        if (k == 0) {
+            // [Matrice A] Décalage à gauche de la ligne i de i position
+            // Dernière ligne ne bouge pas (+1 pour aligner lin au vrai numero de ligne 
+            // (si matrice à 3 lignes lin max = 2, car lin min = 0))
+            //if ((lin+1) != q){	
+                int destdecalA = ((myPE + (q-(lin+1))) % q)+(q*lin);
+                int sourcedecalA = ((myPE + (lin+1)) % q)+(q*lin);
+                //cout << "[Processus : " << myPE << "] destdecalA : " << destdecalA << " send : " << My_matLocA[0] << endl;
+                // Envoie ça matrice de i position (numéro de ligne) vers la gauche
+                MPI_Send(My_matLocA, nloc * nloc, MPI_INT, destdecalA , 0, MPI_COMM_WORLD);
+                // Reçois ça matrice de ça source
+                MPI_Recv(My_matLocA, nloc * nloc, MPI_INT, sourcedecalA, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                //cout << "[Processus : " << myPE << "] sourcedecalA : " << sourcedecalA << " received : " << My_matLocA[0] <<  endl;
+            //}
+            
+            // [Matrice B] Décalage en haut de la colonne j de j position
+            //if((col+1) != q){	//Dernière colonne ne bouge pas
+                int destdecalB = (myPE + (q - (col+1)) * q) % (q * q);
+                int sourcedecalB = (myPE + (q*(col+1))) % (q * q);
+                // Envoie ça matrice de j position (numéro de colonne) vers le haut
+                MPI_Send(My_matLocB, nloc * nloc, MPI_INT, destdecalB , 0, MPI_COMM_WORLD);
+                // Reçois ça matrice de ça source
+                MPI_Recv(My_matLocB, nloc * nloc, MPI_INT, sourcedecalB, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            //}
+        }
+        else {
+            // Multiplication des matrice A et B dans C
+            // multMatrix(My_matLocA, nloc, nloc, My_matLocB, nloc, nloc, matLocC);
+
+            // [Matrice A alias T] Décalage à gauche de une position
+            // Envoie ça matrice à la destination
+            MPI_Send(My_matLocA, nloc * nloc, MPI_INT, destA , 0, MPI_COMM_WORLD);
+            // Reçois ça matrice de ça source
+            MPI_Recv(My_matLocA, nloc * nloc, MPI_INT, sourceA, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            
+            // [Matrice B alisa S] Décalage vers le haut de une position
+            // Envoie ça matrice à la destination
+            MPI_Send(My_matLocB, nloc * nloc, MPI_INT, destB , 0, MPI_COMM_WORLD);
+            // Reçois ça matrice de ça source
+            MPI_Recv(My_matLocB, nloc * nloc, MPI_INT, sourceB, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+	
 		// Multiplication des matrice A et B dans C
         multMatrix(My_matLocA, nloc, nloc, My_matLocB, nloc, nloc, matLocC);
     }

@@ -11,7 +11,7 @@ RM=rm -f
 PROC=64
 SEED=17
 # 1 = Fox / 2 = Cannon / 3 = DNS
-ALGO=1
+ALGO=2
 # Size of the sub-matrix
 DATA=8
 

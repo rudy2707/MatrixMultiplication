@@ -32,7 +32,6 @@ void fox(int* matLocA, int* matLocB, int* matLocC, int nloc) {
     MPI_Comm_size(MPI_COMM_WORLD, &nbPE);
     MPI_Comm_rank(MPI_COMM_WORLD, &myPE);
     MPI_Comm commRow;
-    MPI_Comm commCol;
 
     int q = sqrt(nbPE);
 
