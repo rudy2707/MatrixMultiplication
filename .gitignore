@@ -40,3 +40,4 @@ multmat
 *.log
 
 octave-workspace
+out.m
